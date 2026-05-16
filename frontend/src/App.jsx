@@ -1,17 +1,17 @@
-import {browserRouter as Router, Routes, Route, Link} from 'react-router-dom';
-import Etudiants from './pages/etudiants';
-import Enseignant from './pages/enseignant';
-export default function App() {
+import { Routes, Route } from "react-router-dom";
+import LoginComponent from "./LoginComponent";
+import InscriptionComponent from "./inscriptionComponent";
+import Etudiants from "./Etudiants";
+function App() {
   return (
-    <BrowserRouter>
-      <nav>
-        <Link to="/etudiants">Étudiants</Link>
-        <Link to="/enseignants">Enseignants</Link>
-      </nav>
-      <Routes>
-        <Route path="/etudiants" element={<Etudiants />} />
-        <Route path="/enseignants" element={<Enseignants />} />
-      </Routes>
-    </BrowserRouter>
+    <Routes>
+      <Route path="/" element={<LoginComponent />} />
+      <Route path="/login" element={<LoginComponent />} />
+      <Route path="/inscription" element={<InscriptionComponent />} />
+      <Route path="/etudiants" element={<Etudiants />} />
+
+    </Routes>
   );
 }
+
+export default App;
