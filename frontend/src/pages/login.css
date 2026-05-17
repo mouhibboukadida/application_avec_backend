@@ -1,0 +1,44 @@
+.container {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(to right, #0c5812, #460088, #0c5812);
+  }
+  
+  .card {
+    background: white;
+    padding: 30px;
+    border-radius: 20px;
+    width: 350px;
+    box-shadow: 0px 10px 30px rgba(0,0,0,0.2);
+    text-align: center;
+  }
+  
+  .input {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+  }
+  
+  .button {
+    width: 100%;
+    padding: 12px;
+    background: #460088 ;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+  }
+  
+  .button:hover {
+    background: #6d28d9;
+    
+  }
+  
+  .message {
+    margin-top: 10px;
+    font-weight: bold;
+  }
