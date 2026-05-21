@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import "./EtudiantsPage.css"; // Import du fichier CSS
+import "./EtudiantsPage.css";
+import { useNavigate } from "react-router-dom"; // Add this import
 
 function EtudiantsPage() {
   const [students, setStudents] = useState([]);
-  const [searchTerm, setSearchTerm] = useState(""); // Pour la recherche
+  const [searchTerm, setSearchTerm] = useState("");
 
   const [form, setForm] = useState({
     nom: "",
@@ -19,15 +20,16 @@ function EtudiantsPage() {
   });
 
   const [editingId, setEditingId] = useState(null);
+  const navigate = useNavigate(); // Add navigation
 
   const token = localStorage.getItem("token");
 
-  // 🔒 redirect if no token
+  // 🔒 redirect if no token - FIXED: use navigate instead of window.location
   useEffect(() => {
     if (!token) {
-      window.location.href = "/";
+      navigate("/");
     }
-  }, [token]);
+  }, [token, navigate]);
 
   // 📋 GET Students
   const fetchStudents = async () => {
@@ -40,7 +42,6 @@ function EtudiantsPage() {
           }
         }
       );
-
       setStudents(res.data);
     } catch (err) {
       console.log(err);
@@ -49,8 +50,22 @@ function EtudiantsPage() {
   };
 
   useEffect(() => {
-    fetchStudents();
-  }, []);
+    if (token) {
+      fetchStudents();
+    }
+  }, [token]);
+
+  // ✅ ADD THIS: Filter students based on search term
+  const filteredStudents = students.filter((student) => {
+    const searchLower = searchTerm.toLowerCase();
+    return (
+      student.nom?.toLowerCase().includes(searchLower) ||
+      student.prenom?.toLowerCase().includes(searchLower) ||
+      student.email?.toLowerCase().includes(searchLower) ||
+      student.niveau?.toLowerCase().includes(searchLower) ||
+      student.specialite?.toLowerCase().includes(searchLower)
+    );
+  });
 
   // ✍️ Handle Change
   const handleChange = (e) => {
@@ -73,11 +88,10 @@ function EtudiantsPage() {
       niveau: "",
       specialite: ""
     });
-
     setEditingId(null);
   };
 
-
+  // ✅ FIXED: Don't send ID when adding new student
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -93,29 +107,27 @@ function EtudiantsPage() {
             }
           }
         );
-
         alert("Étudiant modifié");
       } else {
-        // ADD
+        // ADD - Remove id from form data
+        const { ...formData } = form;
         await axios.post(
           "http://localhost:4000/api/etudiants",
-          form,
+          formData,
           {
             headers: {
               Authorization: `Bearer ${token}`
             }
           }
         );
-
         alert("Étudiant ajouté");
       }
 
       resetForm();
       fetchStudents();
-
     } catch (err) {
       console.log(err);
-      alert("Erreur");
+      alert("Erreur: " + (err.response?.data?.message || err.message));
     }
   };
 
@@ -131,15 +143,12 @@ function EtudiantsPage() {
           }
         }
       );
-
       fetchStudents();
-
     } catch (err) {
       console.log(err);
       alert("Erreur suppression");
     }
   };
-
 
   const editStudent = (student) => {
     setForm({
@@ -155,17 +164,15 @@ function EtudiantsPage() {
       niveau: student.niveau || "",
       specialite: student.specialite || ""
     });
-
     setEditingId(student.id);
   };
 
-
   const logout = () => {
     localStorage.removeItem("token");
-    window.location.href = "/";
+    localStorage.removeItem("userRole");
+    localStorage.removeItem("userName");
+    navigate("/");
   };
-
-
 
   return (
     <div className="etudiants-container">
@@ -175,8 +182,6 @@ function EtudiantsPage() {
           Déconnecter
         </button>
       </div>
-
-
 
       {/* FORMULAIRE */}
       <form onSubmit={handleSubmit} className="etudiant-form">
@@ -188,7 +193,6 @@ function EtudiantsPage() {
           onChange={handleChange}
           required
         />
-
         <input
           className="form-input"
           name="prenom"
@@ -197,7 +201,6 @@ function EtudiantsPage() {
           onChange={handleChange}
           required
         />
-
         <input
           className="form-input"
           type="email"
@@ -207,7 +210,6 @@ function EtudiantsPage() {
           onChange={handleChange}
           required
         />
-
         <input
           className="form-input"
           type="number"
@@ -217,7 +219,6 @@ function EtudiantsPage() {
           onChange={handleChange}
           required
         />
-
         <input
           className="form-input"
           name="telephone"
@@ -225,7 +226,6 @@ function EtudiantsPage() {
           value={form.telephone}
           onChange={handleChange}
         />
-
         <input
           className="form-input"
           name="adresse"
@@ -233,7 +233,6 @@ function EtudiantsPage() {
           value={form.adresse}
           onChange={handleChange}
         />
-
         <input
           className="form-input"
           type="date"
@@ -241,7 +240,6 @@ function EtudiantsPage() {
           value={form.date_naissance}
           onChange={handleChange}
         />
-
         <input
           className="form-input"
           name="niveau"
@@ -249,7 +247,6 @@ function EtudiantsPage() {
           value={form.niveau}
           onChange={handleChange}
         />
-
         <input
           className="form-input"
           name="specialite"
@@ -257,21 +254,26 @@ function EtudiantsPage() {
           value={form.specialite}
           onChange={handleChange}
         />
-
         <button type="submit" className="btn-add">
           {editingId ? "Modifier" : "Ajouter"}
         </button>
-
         {editingId && (
-          <button
-            type="button"
-            onClick={resetForm}
-            className="btn-cancel"
-          >
+          <button type="button" onClick={resetForm} className="btn-cancel">
             Annuler
           </button>
         )}
       </form>
+
+      {/* ✅ ADDED: Search Bar */}
+      <div className="search-container">
+        <input
+          type="text"
+          placeholder="Rechercher un étudiant..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="search-input"
+        />
+      </div>
 
       {/* TABLEAU DES ÉTUDIANTS */}
       <h2>Liste des Étudiants ({filteredStudents.length})</h2>
@@ -289,7 +291,6 @@ function EtudiantsPage() {
             <th>Actions</th>
           </tr>
         </thead>
-
         <tbody>
           {filteredStudents.length > 0 ? (
             filteredStudents.map((s) => (
@@ -306,14 +307,13 @@ function EtudiantsPage() {
                     className="btn-edit"
                     onClick={() => editStudent(s)}
                   >
-                     Modifier
+                    Modifier
                   </button>
-
                   <button
                     className="btn-delete"
                     onClick={() => deleteStudent(s.id)}
                   >
-                     Supprimer
+                    Supprimer
                   </button>
                 </td>
               </tr>
