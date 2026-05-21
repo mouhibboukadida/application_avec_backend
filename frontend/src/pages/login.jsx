@@ -29,7 +29,7 @@ const LoginComponent = () => {
         localStorage.setItem("userRole", res.data.user.role);  // ← Stocker le rôle
         localStorage.setItem("userName", res.data.user.name);  // ← Stocker le nom
   
-        setMessage("✅ Login réussi");
+        setMessage(" Login réussi");
   
         // 🔄 REDIRECTION SELON LE RÔLE
         if (res.data.user.role === "enseignant") {
@@ -39,7 +39,7 @@ const LoginComponent = () => {
         }
   
       } else {
-        setMessage("❌ Login échoué");
+        setMessage(" Login échoué");
       }
   
     } catch (err) {
@@ -53,7 +53,7 @@ const LoginComponent = () => {
   return (
     <div className="container">
       <div className="card">
-        <h2>🔐 Connexion</h2>
+        <h2>Connexion</h2>
 
         <input
           className="input"
@@ -85,7 +85,7 @@ const LoginComponent = () => {
           onClick={handleLogin}
           disabled={loading}
         >
-          {loading ? "⏳ Connexion en cours..." : "Se connecter"}
+          {loading ? " Connexion en cours..." : "Se connecter"}
         </button>
 
         {message && <p className={message.includes("✅") ? "success" : "error"}>{message}</p>}
